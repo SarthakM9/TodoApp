@@ -16,7 +16,7 @@ public class QueryHandler extends AsyncQueryHandler
      */
     public interface AsyncQueryListener
     {
-        void onQueryComplete(int token, Object cookie, Uri uri);
+        void onQueryComplete(int token, Object cookie, Cursor cursor);
     }
 
     public QueryHandler(Context context, AsyncQueryListener listener)
@@ -43,21 +43,21 @@ public class QueryHandler extends AsyncQueryHandler
         final AsyncQueryListener listener = mListener.get();
         if (listener != null)
         {
-//            listener.onQueryComplete(token, cookie, cursor);
+            listener.onQueryComplete(token, cookie, cursor);
         }
         else if (cursor != null)
         {
             cursor.close();
         }
     }
-
-    @Override
-    protected void onInsertComplete(int token, Object cookie, Uri uri)
-    {
-        final AsyncQueryListener listener = mListener.get();
-        if (listener != null)
-        {
-            listener.onQueryComplete(token, cookie, uri);
-        }
-    }
+//
+//    @Override
+//    protected void onInsertComplete(int token, Object cookie, Uri uri)
+//    {
+//        final AsyncQueryListener listener = mListener.get();
+//        if (listener != null)
+//        {
+//            listener.onQueryComplete(token, cookie, uri);
+//        }
+//    }
 }
