@@ -23,30 +23,19 @@ package com.showcase.todoapp.utils;
  * SOFTWARE.
  */
 
-import android.database.ContentObserver;
 import android.database.Cursor;
-import android.database.DataSetObserver;
-import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
-import android.widget.Filter;
-import android.widget.FilterQueryProvider;
-import android.widget.Filterable;
 
-public abstract class CursorRecyclerAdapter<VH
-        extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH>
-        implements Filterable, CursorFilter.CursorFilterClient
+public abstract class CursorRecyclerAdapter<VH extends RecyclerView.ViewHolder> extends
+        RecyclerView.Adapter<VH>
 {
-    private boolean mDataValid;
-    private int mRowIDColumn;
-    private Cursor mCursor;
-    private ChangeObserver mChangeObserver;
-    private DataSetObserver mDataSetObserver;
-    private CursorFilter mCursorFilter;
-    private FilterQueryProvider mFilterQueryProvider;
+    protected boolean mDataValid;
+    protected Cursor mCursor;
+    protected int mRowIDColumn;
 
-    public CursorRecyclerAdapter(Cursor cursor)
+    public CursorRecyclerAdapter(Cursor c)
     {
-        init(cursor);
+        init(c);
     }
 
     void init(Cursor c)
@@ -55,49 +44,30 @@ public abstract class CursorRecyclerAdapter<VH
         mCursor = c;
         mDataValid = cursorPresent;
         mRowIDColumn = cursorPresent ? c.getColumnIndexOrThrow("_id") : -1;
-
-        mChangeObserver = new ChangeObserver();
-        mDataSetObserver = new MyDataSetObserver();
-
-        if (cursorPresent)
-        {
-            if (mChangeObserver != null) c.registerContentObserver(mChangeObserver);
-            if (mDataSetObserver != null) c.registerDataSetObserver(mDataSetObserver);
-        }
+        setHasStableIds(true);
     }
 
-    /**
-     * This method will move the Cursor to the correct position and call
-     * {@link #onBindViewHolderCursor(RecyclerView.ViewHolder,
-     * Cursor)}.
-     *
-     * @param holder {@inheritDoc}
-     * @param i      {@inheritDoc}
-     */
     @Override
-    public void onBindViewHolder(VH holder, int i)
+    public final void onBindViewHolder(VH holder, int position)
     {
         if (!mDataValid)
         {
             throw new IllegalStateException("this should only be called when the cursor is valid");
         }
-        if (!mCursor.moveToPosition(i))
+        if (!mCursor.moveToPosition(position))
         {
-            throw new IllegalStateException("couldn't move cursor to position " + i);
+            throw new IllegalStateException("couldn't move cursor to position " + position);
         }
-        onBindViewHolderCursor(holder, mCursor);
+
+        onBindViewHolder(holder, mCursor);
     }
 
-    /**
-     * See {@link android.widget.CursorAdapter#bindView(android.view.View, android.content.Context,
-     * Cursor)},
-     * {@link #onBindViewHolder(RecyclerView.ViewHolder, int)}
-     *
-     * @param holder View holder.
-     * @param cursor The cursor from which to get the data. The cursor is already
-     *               moved to the correct position.
-     */
-    public abstract void onBindViewHolderCursor(VH holder, Cursor cursor);
+    public abstract void onBindViewHolder(VH holder, Cursor cursor);
+
+    public Cursor getCursor()
+    {
+        return mCursor;
+    }
 
     @Override
     public int getItemCount()
@@ -112,13 +82,10 @@ public abstract class CursorRecyclerAdapter<VH
         }
     }
 
-    /**
-     * @see android.widget.ListAdapter#getItemId(int)
-     */
     @Override
     public long getItemId(int position)
     {
-        if (mDataValid && mCursor != null)
+        if (hasStableIds() && mDataValid && mCursor != null)
         {
             if (mCursor.moveToPosition(position))
             {
@@ -126,18 +93,13 @@ public abstract class CursorRecyclerAdapter<VH
             }
             else
             {
-                return 0;
+                return RecyclerView.NO_ID;
             }
         }
         else
         {
-            return 0;
+            return RecyclerView.NO_ID;
         }
-    }
-
-    public Cursor getCursor()
-    {
-        return mCursor;
     }
 
     /**
@@ -172,16 +134,9 @@ public abstract class CursorRecyclerAdapter<VH
             return null;
         }
         Cursor oldCursor = mCursor;
-        if (oldCursor != null)
-        {
-            if (mChangeObserver != null) oldCursor.unregisterContentObserver(mChangeObserver);
-            if (mDataSetObserver != null) oldCursor.unregisterDataSetObserver(mDataSetObserver);
-        }
         mCursor = newCursor;
         if (newCursor != null)
         {
-            if (mChangeObserver != null) newCursor.registerContentObserver(mChangeObserver);
-            if (mDataSetObserver != null) newCursor.registerDataSetObserver(mDataSetObserver);
             mRowIDColumn = newCursor.getColumnIndexOrThrow("_id");
             mDataValid = true;
             // notify the observers about the new cursor
@@ -192,7 +147,6 @@ public abstract class CursorRecyclerAdapter<VH
             mRowIDColumn = -1;
             mDataValid = false;
             // notify the observers about the lack of a data set
-            // notifyDataSetInvalidated();
             notifyItemRangeRemoved(0, getItemCount());
         }
         return oldCursor;
@@ -211,191 +165,4 @@ public abstract class CursorRecyclerAdapter<VH
     {
         return cursor == null ? "" : cursor.toString();
     }
-
-    /**
-     * Runs a query with the specified constraint. This query is requested
-     * by the filter attached to this adapter.
-     * <p/>
-     * The query is provided by a
-     * {@link FilterQueryProvider}.
-     * If no provider is specified, the current cursor is not filtered and returned.
-     * <p/>
-     * After this method returns the resulting cursor is passed to {@link #changeCursor(Cursor)}
-     * and the previous cursor is closed.
-     * <p/>
-     * This method is always executed on a background thread, not on the
-     * application's main thread (or UI thread.)
-     * <p/>
-     * Contract: when constraint is null or empty, the original results,
-     * prior to any filtering, must be returned.
-     *
-     * @param constraint the constraint with which the query must be filtered
-     * @return a Cursor representing the results of the new query
-     * @see #getFilter()
-     * @see #getFilterQueryProvider()
-     * @see #setFilterQueryProvider(FilterQueryProvider)
-     */
-    public Cursor runQueryOnBackgroundThread(CharSequence constraint)
-    {
-        if (mFilterQueryProvider != null)
-        {
-            return mFilterQueryProvider.runQuery(constraint);
-        }
-
-        return mCursor;
-    }
-
-    public Filter getFilter()
-    {
-        if (mCursorFilter == null)
-        {
-            mCursorFilter = new CursorFilter(this);
-        }
-        return mCursorFilter;
-    }
-
-    /**
-     * Returns the query filter provider used for filtering. When the
-     * provider is null, no filtering occurs.
-     *
-     * @return the current filter query provider or null if it does not exist
-     * @see #setFilterQueryProvider(FilterQueryProvider)
-     * @see #runQueryOnBackgroundThread(CharSequence)
-     */
-    public FilterQueryProvider getFilterQueryProvider()
-    {
-        return mFilterQueryProvider;
-    }
-
-    /**
-     * Sets the query filter provider used to filter the current Cursor.
-     * The provider's
-     * {@link FilterQueryProvider#runQuery(CharSequence)}
-     * method is invoked when filtering is requested by a client of
-     * this adapter.
-     *
-     * @param filterQueryProvider the filter query provider or null to remove it
-     * @see #getFilterQueryProvider()
-     * @see #runQueryOnBackgroundThread(CharSequence)
-     */
-    public void setFilterQueryProvider(FilterQueryProvider filterQueryProvider)
-    {
-        mFilterQueryProvider = filterQueryProvider;
-    }
-
-    /**
-     * Called when the {@link ContentObserver} on the cursor receives a change notification.
-     * Can be implemented by sub-class.
-     *
-     * @see ContentObserver#onChange(boolean)
-     */
-    protected void onContentChanged()
-    {
-
-    }
-
-    private class ChangeObserver extends ContentObserver
-    {
-        public ChangeObserver()
-        {
-            super(null);
-        }
-
-        @Override
-        public boolean deliverSelfNotifications()
-        {
-            return true;
-        }
-
-        @Override
-        public void onChange(boolean selfChange)
-        {
-            onContentChanged();
-        }
-    }
-
-    private class MyDataSetObserver extends DataSetObserver
-    {
-        @Override
-        public void onChanged()
-        {
-            mDataValid = true;
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public void onInvalidated()
-        {
-            mDataValid = false;
-            // notifyDataSetInvalidated();
-            notifyItemRangeRemoved(0, getItemCount());
-        }
-    }
-
-    /**
-     * <p>The CursorFilter delegates most of the work to the CursorAdapter.
-     * Subclasses should override these delegate methods to run the queries
-     * and convert the results into String that can be used by auto-completion
-     * widgets.</p>
-     */
-
 }
-
-class CursorFilter extends Filter
-{
-
-    CursorFilterClient mClient;
-
-    interface CursorFilterClient
-    {
-        CharSequence convertToString(Cursor cursor);
-
-        Cursor runQueryOnBackgroundThread(CharSequence constraint);
-
-        Cursor getCursor();
-
-        void changeCursor(Cursor cursor);
-    }
-
-    CursorFilter(CursorFilterClient client)
-    {
-        mClient = client;
-    }
-
-    @Override
-    public CharSequence convertResultToString(Object resultValue)
-    {
-        return mClient.convertToString((Cursor) resultValue);
-    }
-
-    @Override
-    protected FilterResults performFiltering(CharSequence constraint)
-    {
-        Cursor cursor = mClient.runQueryOnBackgroundThread(constraint);
-
-        FilterResults results = new FilterResults();
-        if (cursor != null)
-        {
-            results.count = cursor.getCount();
-            results.values = cursor;
-        }
-        else
-        {
-            results.count = 0;
-            results.values = null;
-        }
-        return results;
-    }
-
-    @Override
-    protected void publishResults(CharSequence constraint, FilterResults results)
-    {
-        Cursor oldCursor = mClient.getCursor();
-
-        if (results.values != null && results.values != oldCursor)
-        {
-            mClient.changeCursor((Cursor) results.values);
-        }
-    }
-}
-

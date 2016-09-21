@@ -1,10 +1,15 @@
 package com.showcase.todoapp.ui.todolist;
 
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -17,15 +22,27 @@ import com.showcase.todoapp.database.TodoContract;
 
 import java.util.Random;
 
-public class TodoListFragment extends Fragment implements QueryHandler.AsyncQueryListener
+public class TodoListFragment extends Fragment implements QueryHandler.AsyncQueryListener,
+        LoaderManager.LoaderCallbacks<Cursor>, TodoListAdapter.OnRowClickListener
 {
     //    private RecyclerView mTodoList;
     QueryHandler mQueryHandler;
+    TodoListAdapter adapter;
+    private TodoListFragmentListener mFragmentListener;
+
+    //    private
+    public TodoListFragment()
+    {
+        if (getActivity() instanceof TodoListFragmentListener)
+        {
+            mFragmentListener = (TodoListFragmentListener) getActivity();
+        }
+    }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable
-    Bundle savedInstanceState)
+            Bundle savedInstanceState)
     {
         return inflater.inflate(R.layout.fragment_todo_list, container, false);
     }
@@ -36,6 +53,16 @@ public class TodoListFragment extends Fragment implements QueryHandler.AsyncQuer
         super.onActivityCreated(savedInstanceState);
         mQueryHandler = new QueryHandler(getContext(), this);
         mQueryHandler.startQuery(1, null, TodoContract.Todo.CONTENT_URI, null, null, null, null);
+
+        getLoaderManager().initLoader(1, null, this);
+
+        adapter = new TodoListAdapter(null, this);
+
+        RecyclerView recyclerView = (RecyclerView) getView().findViewById(R.id
+                .fragment_todo_list_rv_list);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         getView().findViewById(R.id.fragment_button).setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -50,28 +77,75 @@ public class TodoListFragment extends Fragment implements QueryHandler.AsyncQuer
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
-    {
-        super.onViewCreated(view, savedInstanceState);
-
-
-//        ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(adapter);
-//        mItemTouchHelper = new ItemTouchHelper(callback);
-//        mItemTouchHelper.attachToRecyclerView(recyclerView);
-    }
-
-    @Override
     public void onQueryComplete(int token, Object cookie, Cursor cursor)
     {
         if (cursor != null)
         {
-            TodoListAdapter adapter = new TodoListAdapter(cursor);
 
-            RecyclerView recyclerView = (RecyclerView) getView().findViewById(R.id
-                    .fragment_todo_list_rv_list);
-            recyclerView.setHasFixedSize(true);
-            recyclerView.setAdapter(adapter);
-            recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         }
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args)
+    {
+        return new CursorLoader(getContext(), TodoContract.Todo.CONTENT_URI, null, null, null,
+                null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data)
+    {
+        adapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader)
+    {
+        adapter.swapCursor(null);
+    }
+
+    @Override
+    public void onRowClick(int position)
+    {
+
+    }
+
+    @Override
+    public void onRowLongClick(int position, String message, int rowId)
+    {
+        showDialog(message, rowId);
+    }
+
+    private void showDialog(String message, final int rowId)
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener()
+        {
+            public void onClick(DialogInterface dialog, int id)
+            {
+                String selection = TodoContract.Todo.Columns._ID + " = ?";
+                mQueryHandler.startDelete(4, 0, TodoContract.Todo.CONTENT_URI, selection, new
+                        String[]{String.valueOf(rowId)});
+            }
+        });
+        builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener()
+        {
+            public void onClick(DialogInterface dialog, int id)
+            {
+                // User cancelled the dialog
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.setCancelable(false);
+        dialog.setTitle("Delete TODO");
+        dialog.setMessage("Are you sure you want to delete your TODO:\n" +
+                "adjkasjkdajkshdklsjdhfkjlsdhfkjsdfhl sdjklf hjklsadfh kjlsad kldj f");
+//        dialog.set
+        dialog.show();
+    }
+
+    interface TodoListFragmentListener
+    {
+        void displayTodoDetailsFragment();
     }
 }

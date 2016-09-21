@@ -28,6 +28,7 @@ public class TodoItemsActivity extends AppCompatActivity/* implements View.OnCli
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         transaction.add(R.id.activity_todo_items_fl_fragment_container, new TodoListFragment());
+        transaction.addToBackStack(null);
         transaction.commit();
     }
 

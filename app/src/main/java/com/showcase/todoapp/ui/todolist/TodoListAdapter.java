@@ -8,24 +8,31 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.showcase.todoapp.R;
-import com.showcase.todoapp.database.QueryHandler;
 import com.showcase.todoapp.database.TodoContract;
 import com.showcase.todoapp.utils.CursorRecyclerAdapter;
 
 public class TodoListAdapter extends CursorRecyclerAdapter<TodoListAdapter.ItemViewHolder>
 {
+    private OnRowClickListener mClickListener;
 
-    public TodoListAdapter(Cursor cursor)
+    public interface OnRowClickListener
+    {
+        void onRowClick(int position);
+
+        void onRowLongClick(int position, String message, int row_id);
+    }
+
+    public TodoListAdapter(Cursor cursor, OnRowClickListener clickListener)
     {
         super(cursor);
+        mClickListener = clickListener;
     }
 
     @Override
-    public void onBindViewHolderCursor(ItemViewHolder holder, Cursor cursor)
+    public void onBindViewHolder(ItemViewHolder holder, Cursor cursor)
     {
         holder.textView.setText(cursor.getString(cursor.getColumnIndex(TodoContract.Todo.Columns
                 .DATA)));
-//        holder.textView.setTex
     }
 
     @Override
@@ -84,21 +91,42 @@ public class TodoListAdapter extends CursorRecyclerAdapter<TodoListAdapter.ItemV
 //        return mItems.size();
 //    }
 //
-    public static class ItemViewHolder extends RecyclerView.ViewHolder
+    class ItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View
+            .OnLongClickListener
     {
-        public final TextView textView;
+        private final TextView textView;
 
         public ItemViewHolder(View itemView)
         {
             super(itemView);
             textView = (TextView) itemView.findViewById(R.id.todo_list_row_tv_title);
+            itemView.setOnClickListener(this);
+            itemView.setOnLongClickListener(this);
         }
-    }
 
-    @Override
-    protected void onContentChanged()
-    {
-        super.onContentChanged();
+        @Override
+        public void onClick(View view)
+        {
+            if (mClickListener != null)
+            {
+                mClickListener.onRowClick(getAdapterPosition());
+            }
+        }
 
+        @Override
+        public boolean onLongClick(View view)
+        {
+            if (mClickListener != null)
+            {
+                if (mCursor.moveToPosition(getAdapterPosition()))
+                {
+                    int columnIdIndex = mCursor.getColumnIndex(TodoContract.Todo.Columns._ID);
+                    int columnDataIndex = mCursor.getColumnIndex(TodoContract.Todo.Columns.DATA);
+                    mClickListener.onRowLongClick(getAdapterPosition(), mCursor.getString
+                            (columnDataIndex), mCursor.getInt(columnIdIndex));
+                }
+            }
+            return true;
+        }
     }
 }

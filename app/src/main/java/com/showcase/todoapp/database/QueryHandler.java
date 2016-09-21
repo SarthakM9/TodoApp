@@ -3,7 +3,6 @@ package com.showcase.todoapp.database;
 import android.content.AsyncQueryHandler;
 import android.content.Context;
 import android.database.Cursor;
-import android.net.Uri;
 
 import java.lang.ref.WeakReference;
 
@@ -17,6 +16,8 @@ public class QueryHandler extends AsyncQueryHandler
     public interface AsyncQueryListener
     {
         void onQueryComplete(int token, Object cookie, Cursor cursor);
+
+//        void onDeleteComplete(int token, Object cookie, int result);
     }
 
     public QueryHandler(Context context, AsyncQueryListener listener)
@@ -50,7 +51,19 @@ public class QueryHandler extends AsyncQueryHandler
             cursor.close();
         }
     }
-//
+
+//    @Override
+//    protected void onDeleteComplete(int token, Object cookie, int result)
+//    {
+////        super.onDeleteComplete(token, cookie, result);
+//        final AsyncQueryListener listener = mListener.get();
+//        if (listener != null)
+//        {
+//            listener.onDeleteComplete(token, cookie, result);
+//        }
+//    }
+
+    //
 //    @Override
 //    protected void onInsertComplete(int token, Object cookie, Uri uri)
 //    {
