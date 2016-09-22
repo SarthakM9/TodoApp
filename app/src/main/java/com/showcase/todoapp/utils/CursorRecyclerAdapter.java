@@ -24,12 +24,13 @@ package com.showcase.todoapp.utils;
  */
 
 import android.database.Cursor;
+import android.provider.BaseColumns;
 import android.support.v7.widget.RecyclerView;
 
 public abstract class CursorRecyclerAdapter<VH extends RecyclerView.ViewHolder> extends
         RecyclerView.Adapter<VH>
 {
-    protected boolean mDataValid;
+    private boolean mDataValid;
     protected Cursor mCursor;
     protected int mRowIDColumn;
 
@@ -38,12 +39,12 @@ public abstract class CursorRecyclerAdapter<VH extends RecyclerView.ViewHolder> 
         init(c);
     }
 
-    void init(Cursor c)
+    private void init(Cursor c)
     {
         boolean cursorPresent = c != null;
         mCursor = c;
         mDataValid = cursorPresent;
-        mRowIDColumn = cursorPresent ? c.getColumnIndexOrThrow("_id") : -1;
+        mRowIDColumn = cursorPresent ? c.getColumnIndexOrThrow(BaseColumns._ID) : -1;
         setHasStableIds(true);
     }
 

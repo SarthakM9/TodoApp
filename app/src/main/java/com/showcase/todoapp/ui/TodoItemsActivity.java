@@ -6,9 +6,11 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 
 import com.showcase.todoapp.R;
+import com.showcase.todoapp.ui.tododetails.TodoDetailsFragment;
 import com.showcase.todoapp.ui.todolist.TodoListFragment;
 
-public class TodoItemsActivity extends AppCompatActivity/* implements View.OnClickListener,
+public class TodoItemsActivity extends AppCompatActivity implements TodoListFragment
+        .TodoListFragmentListener/* implements View.OnClickListener,
         TodoItemsContract.ViewReaction, QueryHandler.AsyncQueryListener*/
 {
 //    private QueryHandler mQueryHandler;
@@ -28,7 +30,7 @@ public class TodoItemsActivity extends AppCompatActivity/* implements View.OnCli
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         transaction.add(R.id.activity_todo_items_fl_fragment_container, new TodoListFragment());
-        transaction.addToBackStack(null);
+//        transaction.addToBackStack(null);
         transaction.commit();
     }
 
@@ -84,4 +86,19 @@ public class TodoItemsActivity extends AppCompatActivity/* implements View.OnCli
 //
 //        }
 //    }
+
+
+    @Override
+    public void onBackPressed()
+    {
+        getSupportFragmentManager().popBackStack();
+    }
+
+    @Override
+    public void displayTodoDetailsFragment()
+    {
+        getSupportFragmentManager().beginTransaction().add(R.id
+                .activity_todo_items_fl_fragment_container, new TodoDetailsFragment())
+                .addToBackStack(null).commit();
+    }
 }

@@ -30,13 +30,19 @@ public class TodoListFragment extends Fragment implements QueryHandler.AsyncQuer
     TodoListAdapter adapter;
     private TodoListFragmentListener mFragmentListener;
 
-    //    private
-    public TodoListFragment()
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState)
     {
+        super.onCreate(savedInstanceState);
         if (getActivity() instanceof TodoListFragmentListener)
         {
             mFragmentListener = (TodoListFragmentListener) getActivity();
         }
+    }
+
+    public TodoListFragment()
+    {
+
     }
 
     @Nullable
@@ -107,7 +113,10 @@ public class TodoListFragment extends Fragment implements QueryHandler.AsyncQuer
     @Override
     public void onRowClick(int position)
     {
-
+        if (mFragmentListener != null)
+        {
+            mFragmentListener.displayTodoDetailsFragment();
+        }
     }
 
     @Override
@@ -139,12 +148,11 @@ public class TodoListFragment extends Fragment implements QueryHandler.AsyncQuer
         dialog.setCancelable(false);
         dialog.setTitle("Delete TODO");
         dialog.setMessage("Are you sure you want to delete your TODO:\n" +
-                "adjkasjkdajkshdklsjdhfkjlsdhfkjsdfhl sdjklf hjklsadfh kjlsad kldj f");
-//        dialog.set
+                message);
         dialog.show();
     }
 
-    interface TodoListFragmentListener
+    public interface TodoListFragmentListener
     {
         void displayTodoDetailsFragment();
     }

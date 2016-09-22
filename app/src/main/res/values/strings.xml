@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">TodoApp</string>
+    <string-array name="priority_array">
+
+        <item>HIGH</item>
+        <item>MEDIUM</item>
+        <item>LOW</item>
+    </string-array>
+
 </resources>
