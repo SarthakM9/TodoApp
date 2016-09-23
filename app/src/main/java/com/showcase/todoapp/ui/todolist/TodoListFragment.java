@@ -2,7 +2,7 @@ package com.showcase.todoapp.ui.todolist;
 
 import android.content.DialogInterface;
 import android.database.Cursor;
-import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -15,18 +15,21 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ViewSwitcher;
 
 import com.showcase.todoapp.R;
 import com.showcase.todoapp.database.QueryHandler;
 import com.showcase.todoapp.database.TodoContract;
+import com.showcase.todoapp.utils.SpacesItemDecoration;
 import com.showcase.todoapp.utils.Utility;
 
-public class TodoListFragment extends Fragment implements QueryHandler.AsyncQueryListener,
-        LoaderManager.LoaderCallbacks<Cursor>, TodoListAdapter.OnRowClickListener
+public class TodoListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,
+        TodoListAdapter.OnRowClickListener
 {
     private QueryHandler mQueryHandler;
-    private TodoListAdapter adapter;
+    private TodoListAdapter mAdapter;
     private TodoListFragmentListener mFragmentListener;
+    private ViewSwitcher mSwitcher;
 
     public TodoListFragment()
     {
@@ -54,38 +57,30 @@ public class TodoListFragment extends Fragment implements QueryHandler.AsyncQuer
     public void onActivityCreated(@Nullable Bundle savedInstanceState)
     {
         super.onActivityCreated(savedInstanceState);
-        mQueryHandler = new QueryHandler(getContext(), this);
-        mQueryHandler.startQuery(1, null, TodoContract.Todo.CONTENT_URI, null, null, null, null);
+
+        mSwitcher = (ViewSwitcher) getView().findViewById(R.id.fragment_todo_list_switcher);
+
+        mQueryHandler = new QueryHandler(getContext(), null);
 
         getLoaderManager().initLoader(1, null, this);
 
-        adapter = new TodoListAdapter(null, this);
-
+        mAdapter = new TodoListAdapter(getContext(), null, this);
         RecyclerView recyclerView = (RecyclerView) getView().findViewById(R.id
                 .fragment_todo_list_rv_list);
         recyclerView.setHasFixedSize(true);
-        recyclerView.setAdapter(adapter);
-        recyclerView.addItemDecoration(new SpacesItemDecoration((int) Utility.dpToPx(10,
+        recyclerView.setAdapter(mAdapter);
+
+        recyclerView.addItemDecoration(new SpacesItemDecoration((int) Utility.dpToPx(5,
                 getContext())));
-//        recyclerView.s
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         getView().findViewById(R.id.fragment_button).setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View view)
             {
-                displayDetailsFragment();
+                displayDetailsFragment(null);
             }
         });
-    }
-
-    @Override
-    public void onQueryComplete(int token, Object cookie, Cursor cursor)
-    {
-        if (cursor != null)
-        {
-
-        }
     }
 
     @Override
@@ -93,38 +88,54 @@ public class TodoListFragment extends Fragment implements QueryHandler.AsyncQuer
     {
         String[] projection = {TodoContract.Todo.Columns._ID, TodoContract.Todo.Columns.TITLE,
                 TodoContract.Todo.Columns.DATE, TodoContract.Todo.Columns.PRIORITY};
-        return new CursorLoader(getContext(), TodoContract.Todo.CONTENT_URI, projection, null, null,
-                null);
+        String sortOrder = TodoContract.Todo.Columns.PRIORITY + " ASC";
+        return new CursorLoader(getContext(), TodoContract.Todo.CONTENT_URI, projection, null,
+                null, sortOrder);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data)
     {
-        adapter.swapCursor(data);
+//        mAdapter.swapCursor(data);
+        if (data.getCount() > 0)
+        {
+            mAdapter.swapCursor(data);
+
+            if (R.id.fragment_todo_list_rv_list == mSwitcher.getNextView().getId())
+            {
+                mSwitcher.showNext();
+            }
+        }
+        else if (R.id.fragment_todo_list_tv_empty_text == mSwitcher.getNextView().getId())
+        {
+            mSwitcher.showNext();
+        }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader)
     {
-        adapter.swapCursor(null);
+        mAdapter.swapCursor(null);
     }
 
     @Override
-    public void onRowClick(int position)
+    public void onRowClick(Uri uri)
     {
-        displayDetailsFragment();
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("uri", uri);
+        displayDetailsFragment(bundle);
     }
 
-    private void displayDetailsFragment()
+    private void displayDetailsFragment(Bundle bundle)
     {
         if (mFragmentListener != null)
         {
-            mFragmentListener.displayTodoDetailsFragment();
+            mFragmentListener.displayTodoDetailsFragment(bundle);
         }
     }
 
     @Override
-    public void onRowLongClick(int position, String message, int rowId)
+    public void onRowLongClick(String message, int rowId)
     {
         showDialog(message, rowId);
     }
@@ -141,46 +152,16 @@ public class TodoListFragment extends Fragment implements QueryHandler.AsyncQuer
                         String[]{String.valueOf(rowId)});
             }
         });
-        builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener()
-        {
-            public void onClick(DialogInterface dialog, int id)
-            {
-                // User cancelled the dialog
-            }
-        });
+        builder.setNegativeButton("CANCEL", null);
         AlertDialog dialog = builder.create();
         dialog.setCancelable(false);
         dialog.setTitle("Delete TODO");
-        dialog.setMessage("Are you sure you want to delete your TODO:\n" +
-                message);
+        dialog.setMessage("Are you sure you want to delete your TODO:\n\n" + message);
         dialog.show();
     }
 
     public interface TodoListFragmentListener
     {
-        void displayTodoDetailsFragment();
-    }
-
-    public static class SpacesItemDecoration extends RecyclerView.ItemDecoration
-    {
-        private int space;
-
-        public SpacesItemDecoration(int space)
-        {
-            this.space = space;
-        }
-
-        @Override
-        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView
-                .State state)
-        {
-            outRect.left = space;
-            outRect.right = space;
-            outRect.bottom = space;
-
-            // Add top margin only for the first item to avoid double space between items
-            if (parent.getChildAdapterPosition(view) == 0)
-                outRect.top = space;
-        }
+        void displayTodoDetailsFragment(Bundle bundle);
     }
 }

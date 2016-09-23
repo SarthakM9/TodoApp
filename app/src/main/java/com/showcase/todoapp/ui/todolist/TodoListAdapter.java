@@ -1,6 +1,10 @@
 package com.showcase.todoapp.ui.todolist;
 
+import android.content.Context;
+import android.content.res.Resources;
 import android.database.Cursor;
+import android.net.Uri;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,25 +18,37 @@ import com.showcase.todoapp.utils.CursorRecyclerAdapter;
 public class TodoListAdapter extends CursorRecyclerAdapter<TodoListAdapter.ItemViewHolder>
 {
     private OnRowClickListener mClickListener;
+    private String[] mPriorityArray;
+    private int[] mPrColorArray;
 
     public interface OnRowClickListener
     {
-        void onRowClick(int position);
+        void onRowClick(Uri uri);
 
-        void onRowLongClick(int position, String message, int row_id);
+        void onRowLongClick(String message, int row_id);
     }
 
-    public TodoListAdapter(Cursor cursor, OnRowClickListener clickListener)
+    public TodoListAdapter(Context context, Cursor cursor, OnRowClickListener clickListener)
     {
         super(cursor);
+        Resources resources = context.getResources();
         mClickListener = clickListener;
+        mPriorityArray = resources.getStringArray(R.array.priority_array);
+        mPrColorArray = new int[]{ContextCompat.getColor(context, android.R.color.holo_red_dark),
+                ContextCompat.getColor(context, android.R.color.holo_orange_dark), ContextCompat
+                .getColor(context, android.R.color.holo_green_dark)};
     }
 
     @Override
     public void onBindViewHolder(ItemViewHolder holder, Cursor cursor)
     {
-        holder.textView.setText(cursor.getString(cursor.getColumnIndex(TodoContract.Todo.Columns
+        holder.title.setText(cursor.getString(cursor.getColumnIndex(TodoContract.Todo.Columns
                 .TITLE)));
+        int priority = cursor.getInt(cursor.getColumnIndex(TodoContract.Todo.Columns.PRIORITY));
+        holder.priority.setText(mPriorityArray[priority]);
+        holder.priority.setTextColor(mPrColorArray[priority]);
+        holder.date.setText(cursor.getString(cursor.getColumnIndex(TodoContract.Todo.Columns
+                .DATE)));
     }
 
     @Override
@@ -42,64 +58,19 @@ public class TodoListAdapter extends CursorRecyclerAdapter<TodoListAdapter.ItemV
                 .todo_list_row, parent, false));
     }
 
-    //    private static final String[] STRINGS = new String[]{
-//            "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten",
-//            "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"
-//    };
-//
-//    private final List<String> mItems = new ArrayList<>();
-//
-//    public TodoListAdapter()
-//    {
-//        mItems.addAll(Arrays.asList(STRINGS));
-//    }
-//
-//    @Override
-//    public ItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
-//    {
-//        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.todo_list_row,
-// parent,
-//                false);
-//        ItemViewHolder itemViewHolder = new ItemViewHolder(view);
-//        return itemViewHolder;
-//    }
-//
-//    @Override
-//    public void onBindViewHolder(final ItemViewHolder holder, int position)
-//    {
-//        holder.textView.setText(mItems.get(position));
-//    }
-//
-//    @Override
-//    public void onItemDismiss(int position)
-//    {
-//        mItems.remove(position);
-//        notifyItemRemoved(position);
-//    }
-//
-//    @Override
-//    public void onItemMove(int fromPosition, int toPosition)
-//    {
-//        String prev = mItems.remove(fromPosition);
-//        mItems.add(toPosition > fromPosition ? toPosition - 1 : toPosition, prev);
-//        notifyItemMoved(fromPosition, toPosition);
-//    }
-//
-//    @Override
-//    public int getItemCount()
-//    {
-//        return mItems.size();
-//    }
-//
     class ItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View
             .OnLongClickListener
     {
-        private final TextView textView;
+        private final TextView title;
+        private final TextView date;
+        private final TextView priority;
 
         public ItemViewHolder(View itemView)
         {
             super(itemView);
-            textView = (TextView) itemView.findViewById(R.id.todo_list_row_tv_title);
+            title = (TextView) itemView.findViewById(R.id.todo_list_row_tv_title);
+            date = (TextView) itemView.findViewById(R.id.todo_list_row_tv_date);
+            priority = (TextView) itemView.findViewById(R.id.todo_list_row_tv_priority);
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
         }
@@ -109,7 +80,12 @@ public class TodoListAdapter extends CursorRecyclerAdapter<TodoListAdapter.ItemV
         {
             if (mClickListener != null)
             {
-                mClickListener.onRowClick(getAdapterPosition());
+                if (mCursor.moveToPosition(getAdapterPosition()))
+                {
+                    int columnIdIndex = mCursor.getColumnIndex(TodoContract.Todo.Columns._ID);
+                    Uri uri = TodoContract.Todo.buildRowUri(mCursor.getInt(columnIdIndex));
+                    mClickListener.onRowClick(uri);
+                }
             }
         }
 
@@ -122,8 +98,8 @@ public class TodoListAdapter extends CursorRecyclerAdapter<TodoListAdapter.ItemV
                 {
                     int columnIdIndex = mCursor.getColumnIndex(TodoContract.Todo.Columns._ID);
                     int columnDataIndex = mCursor.getColumnIndex(TodoContract.Todo.Columns.TITLE);
-                    mClickListener.onRowLongClick(getAdapterPosition(), mCursor.getString
-                            (columnDataIndex), mCursor.getInt(columnIdIndex));
+                    mClickListener.onRowLongClick(mCursor.getString(columnDataIndex), mCursor
+                            .getInt(columnIdIndex));
                 }
             }
             return true;

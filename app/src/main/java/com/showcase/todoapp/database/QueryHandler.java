@@ -3,6 +3,7 @@ package com.showcase.todoapp.database;
 import android.content.AsyncQueryHandler;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 
 import java.lang.ref.WeakReference;
 
@@ -17,7 +18,12 @@ public class QueryHandler extends AsyncQueryHandler
     {
         void onQueryComplete(int token, Object cookie, Cursor cursor);
 
-//        void onDeleteComplete(int token, Object cookie, int result);
+        void onDeleteComplete(int token, Object cookie, int result);
+
+        void onInsertComplete(int token, Object cookie, Uri uri);
+
+        void onUpdateComplete(int token, Object cookie, int result);
+
     }
 
     public QueryHandler(Context context, AsyncQueryListener listener)
@@ -32,7 +38,7 @@ public class QueryHandler extends AsyncQueryHandler
      */
     public void setQueryListener(AsyncQueryListener listener)
     {
-        mListener = new WeakReference<AsyncQueryListener>(listener);
+        mListener = new WeakReference<>(listener);
     }
 
     /**
@@ -52,25 +58,33 @@ public class QueryHandler extends AsyncQueryHandler
         }
     }
 
-//    @Override
-//    protected void onDeleteComplete(int token, Object cookie, int result)
-//    {
-////        super.onDeleteComplete(token, cookie, result);
-//        final AsyncQueryListener listener = mListener.get();
-//        if (listener != null)
-//        {
-//            listener.onDeleteComplete(token, cookie, result);
-//        }
-//    }
+    @Override
+    protected void onDeleteComplete(int token, Object cookie, int result)
+    {
+        final AsyncQueryListener listener = mListener.get();
+        if (listener != null)
+        {
+            listener.onDeleteComplete(token, cookie, result);
+        }
+    }
 
-    //
-//    @Override
-//    protected void onInsertComplete(int token, Object cookie, Uri uri)
-//    {
-//        final AsyncQueryListener listener = mListener.get();
-//        if (listener != null)
-//        {
-//            listener.onQueryComplete(token, cookie, uri);
-//        }
-//    }
+    @Override
+    protected void onInsertComplete(int token, Object cookie, Uri uri)
+    {
+        final AsyncQueryListener listener = mListener.get();
+        if (listener != null)
+        {
+            listener.onInsertComplete(token, cookie, uri);
+        }
+    }
+
+    @Override
+    protected void onUpdateComplete(int token, Object cookie, int result)
+    {
+        final AsyncQueryListener listener = mListener.get();
+        if (listener != null)
+        {
+            listener.onUpdateComplete(token, cookie, result);
+        }
+    }
 }

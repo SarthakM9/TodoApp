@@ -1,6 +1,9 @@
 package com.showcase.todoapp.ui.tododetails;
 
+import android.content.ContentUris;
 import android.content.ContentValues;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -22,14 +25,16 @@ import java.util.Calendar;
 
 import static com.showcase.todoapp.utils.Utility.getDate;
 
-public class TodoDetailsFragment extends Fragment implements View.OnClickListener
+public class TodoDetailsFragment extends Fragment implements View.OnClickListener, QueryHandler
+        .AsyncQueryListener
 {
     private TextView mDate;
     private TodoDetailsFragmentListener mFragmentListener;
-    private boolean isUpdating = false;
+    //    private boolean mIsUpdating = false;
     private EditText mTitle;
     private EditText mDescription;
     private Spinner mSpinner;
+    private Uri mUri;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState)
@@ -40,6 +45,11 @@ public class TodoDetailsFragment extends Fragment implements View.OnClickListene
             mFragmentListener = (TodoDetailsFragmentListener) getActivity();
         }
 
+        Bundle bundle = getArguments();
+        if (bundle != null && !bundle.isEmpty())
+        {
+            mUri = bundle.getParcelable("uri");
+        }
     }
 
     @Nullable
@@ -51,13 +61,24 @@ public class TodoDetailsFragment extends Fragment implements View.OnClickListene
     }
 
     @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
+    {
+        super.onViewCreated(view, savedInstanceState);
+        if (mUri != null)
+        {
+            QueryHandler handler = new QueryHandler(getContext(), this);
+            handler.startQuery(1, null, mUri, null, null, null, null);
+        }
+    }
+
+    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState)
     {
         super.onActivityCreated(savedInstanceState);
         View view = getView();
         mSpinner = (Spinner) view.findViewById(R.id.fragment_todo_details_spn_priority);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
-                R.array.priority_array, android.R.layout.simple_spinner_item);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(), R
+                .array.priority_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mSpinner.setAdapter(adapter);
 
@@ -91,7 +112,6 @@ public class TodoDetailsFragment extends Fragment implements View.OnClickListene
                 {
                     Toast.makeText(getContext(), "Title cannot be blank", Toast.LENGTH_SHORT)
                             .show();
-
                 }
                 break;
         }
@@ -105,26 +125,29 @@ public class TodoDetailsFragment extends Fragment implements View.OnClickListene
     private void saveTodo()
     {
         QueryHandler queryHandler = new QueryHandler(getContext(), null);
-        String title = mTitle.getText().toString().replaceAll("\\s{2,}", " ").replaceAll("" +
-                        "(\\n\\r?)+",
-                " ").trim();
+        String title = mTitle.getText().toString().replaceAll("\\s{2,}", " ").replaceAll("" + "" +
+                "(\\n\\r?)+", " ").trim();
         String description = mDescription.getText().toString().replaceAll("\\s{2,}", " ")
-                .replaceAll("(\\n\\r?)+",
-                        " ").trim();
+                .replaceAll("(\\n\\r?)+", " ").trim();
         String date = mDate.getText().toString();
         int priority = mSpinner.getSelectedItemPosition();
-        if (isUpdating)
+        ContentValues values = new ContentValues();
+        values.put(TodoContract.Todo.Columns.TITLE, title);
+        values.put(TodoContract.Todo.Columns.DESCRIPTION, description);
+        values.put(TodoContract.Todo.Columns.DATE, date);
+        values.put(TodoContract.Todo.Columns.PRIORITY, priority);
+        if (mUri != null)
         {
-
+            long _id = ContentUris.parseId(mUri);
+            String selection = TodoContract.Todo.Columns._ID + " = ?";
+            String[] selectionArg = {String.valueOf(_id)};
+            queryHandler.startUpdate(1, null, TodoContract.Todo.CONTENT_URI, values, selection,
+                    selectionArg);
 //            queryHandl
         }
         else
         {
-            ContentValues values = new ContentValues();
-            values.put(TodoContract.Todo.Columns.TITLE, title);
-            values.put(TodoContract.Todo.Columns.DESCRIPTION, description);
-            values.put(TodoContract.Todo.Columns.DATE, date);
-            values.put(TodoContract.Todo.Columns.PRIORITY, priority);
+
             queryHandler.startInsert(1, null, TodoContract.Todo.CONTENT_URI, values);
         }
         getActivity().getSupportFragmentManager().popBackStack();
@@ -133,6 +156,48 @@ public class TodoDetailsFragment extends Fragment implements View.OnClickListene
     public void setDate(String date)
     {
         mDate.setText(date);
+    }
+
+    @Override
+    public void onQueryComplete(int token, Object cookie, Cursor cursor)
+    {
+        if (cursor != null && cursor.getCount() == 1 && cursor.moveToFirst())
+        {
+//            cursor.moveToFirst();
+            mTitle.setText(cursor.getString(cursor.getColumnIndex(TodoContract.Todo.Columns
+                    .TITLE)));
+
+            mDescription.setText(cursor.getString(cursor.getColumnIndex(TodoContract.Todo.Columns
+                    .DESCRIPTION)));
+            mDate.setText(cursor.getString(cursor.getColumnIndex(TodoContract.Todo.Columns.DATE)));
+            mSpinner.setSelection(cursor.getInt(cursor.getColumnIndex(TodoContract.Todo.Columns
+                    .PRIORITY)), true);
+            cursor.close();
+        }
+        else
+        {
+            Toast.makeText(getContext(), "Invalid state! Please try again.", Toast.LENGTH_SHORT)
+                    .show();
+            getActivity().getSupportFragmentManager().popBackStack();
+        }
+    }
+
+    @Override
+    public void onDeleteComplete(int token, Object cookie, int result)
+    {
+
+    }
+
+    @Override
+    public void onInsertComplete(int token, Object cookie, Uri uri)
+    {
+
+    }
+
+    @Override
+    public void onUpdateComplete(int token, Object cookie, int result)
+    {
+
     }
 
     public interface TodoDetailsFragmentListener

@@ -25,6 +25,13 @@ public class TodoItemsActivity extends AppCompatActivity implements TodoListFrag
     private static final String TAG_FRAGMENT_DETAILS = "detailsfragment";
 //    private QueryHandler mQueryHandler;
 
+
+//    @Override
+//    protected void onResume()
+//    {
+//        super.onResume();
+//    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -81,11 +88,12 @@ public class TodoItemsActivity extends AppCompatActivity implements TodoListFrag
     }
 
     @Override
-    public void displayTodoDetailsFragment()
+    public void displayTodoDetailsFragment(Bundle bundle)
     {
+        TodoDetailsFragment fragment = new TodoDetailsFragment();
+        fragment.setArguments(bundle);
         getSupportFragmentManager().beginTransaction().add(R.id
-                        .activity_todo_items_fl_fragment_container, new TodoDetailsFragment(),
-                TAG_FRAGMENT_DETAILS)
+                .activity_todo_items_fl_fragment_container, fragment, TAG_FRAGMENT_DETAILS)
                 .addToBackStack(null).commit();
     }
 

@@ -17,8 +17,8 @@ public class TodoDbHelper extends SQLiteOpenHelper
             "(" + Columns._ID + SPACE + "INTEGER PRIMARY KEY" + COMMA_SEP + Columns.TITLE + SPACE +
             "TEXT NOT NULL" + COMMA_SEP + Columns.DESCRIPTION + SPACE + "TEXT NOT NULL" +
             COMMA_SEP + Columns.DATE + SPACE + "TEXT NOT NULL" + COMMA_SEP + Columns.PRIORITY +
-            SPACE + "INTEGER"
-            + ")";
+            SPACE + "INTEGER" + ")";
+
     private static final String DROP_TABLE_TODO = "DROP TABLE IF EXISTS " + TodoContract.Todo
             .TABLE_NAME;
 

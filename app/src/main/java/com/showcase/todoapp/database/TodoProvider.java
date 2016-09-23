@@ -7,15 +7,14 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 public class TodoProvider extends ContentProvider
 {
     private static final int TODO_TABLE_ID = 100;
     private static final int TODO_ROW_ID = 101;
-
     private TodoDbHelper mDbHelper;
-
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
     static
@@ -35,7 +34,7 @@ public class TodoProvider extends ContentProvider
 
     @Nullable
     @Override
-    public String getType(Uri uri)
+    public String getType(@NonNull Uri uri)
     {
         switch (sUriMatcher.match(uri))
         {
@@ -52,36 +51,23 @@ public class TodoProvider extends ContentProvider
 
     @Nullable
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
-                        String sortOrder)
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[]
+            selectionArgs, String sortOrder)
     {
         final SQLiteDatabase db = mDbHelper.getWritableDatabase();
         Cursor retCursor;
         switch (sUriMatcher.match(uri))
         {
             case TODO_TABLE_ID:
-                retCursor = db.query(
-                        TodoContract.Todo.TABLE_NAME,
-                        projection,
-                        selection,
-                        selectionArgs,
-                        null,
-                        null,
-                        sortOrder
-                );
+                retCursor = db.query(TodoContract.Todo.TABLE_NAME, projection, selection,
+                        selectionArgs, null, null, sortOrder);
                 break;
 
             case TODO_ROW_ID:
                 long _id = ContentUris.parseId(uri);
-                retCursor = db.query(
-                        TodoContract.Todo.TABLE_NAME,
-                        projection,
-                        TodoContract.Todo.Columns._ID + " = ?",
-                        new String[]{String.valueOf(_id)},
-                        null,
-                        null,
-                        sortOrder
-                );
+                retCursor = db.query(TodoContract.Todo.TABLE_NAME, projection, TodoContract.Todo
+                        .Columns._ID + " = ?", new String[]{String.valueOf(_id)}, null, null,
+                        sortOrder);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -93,7 +79,7 @@ public class TodoProvider extends ContentProvider
 
     @Nullable
     @Override
-    public Uri insert(Uri uri, ContentValues contentValues)
+    public Uri insert(@NonNull Uri uri, ContentValues contentValues)
     {
         final SQLiteDatabase db = mDbHelper.getWritableDatabase();
         long _id;
@@ -104,7 +90,7 @@ public class TodoProvider extends ContentProvider
             _id = db.insert(TodoContract.Todo.TABLE_NAME, null, contentValues);
             if (_id > 0)
             {
-                returnUri = TodoContract.Todo.buildGenreUri(_id);
+                returnUri = TodoContract.Todo.buildRowUri(_id);
             }
             else
             {
@@ -121,7 +107,7 @@ public class TodoProvider extends ContentProvider
     }
 
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs)
+    public int delete(@NonNull Uri uri, String selection, String[] selectionArgs)
     {
         final SQLiteDatabase db = mDbHelper.getWritableDatabase();
         int rows; // Number of rows effected
@@ -143,14 +129,14 @@ public class TodoProvider extends ContentProvider
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs)
+    public int update(@NonNull Uri uri, ContentValues values, String selection, String[]
+            selectionArgs)
     {
         final SQLiteDatabase db = mDbHelper.getWritableDatabase();
         int rows = 0;
         if (sUriMatcher.match(uri) == TODO_TABLE_ID)
         {
-            rows = db.update(TodoContract.Todo.TABLE_NAME, values, selection,
-                    selectionArgs);
+            rows = db.update(TodoContract.Todo.TABLE_NAME, values, selection, selectionArgs);
         }
         else
         {
