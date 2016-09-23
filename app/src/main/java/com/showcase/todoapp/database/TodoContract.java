@@ -32,7 +32,10 @@ public final class TodoContract
         // Define table columns
         public interface Columns extends BaseColumns
         {
-            String DATA = "data";
+            String TITLE = "title";
+            String DESCRIPTION = "description";
+            String DATE = "date";
+            String PRIORITY = "priority";
         }
 
         public static Uri buildGenreUri(long id)

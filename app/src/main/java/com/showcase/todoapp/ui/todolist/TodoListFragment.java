@@ -1,8 +1,8 @@
 package com.showcase.todoapp.ui.todolist;
 
-import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.database.Cursor;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -19,16 +19,18 @@ import android.view.ViewGroup;
 import com.showcase.todoapp.R;
 import com.showcase.todoapp.database.QueryHandler;
 import com.showcase.todoapp.database.TodoContract;
-
-import java.util.Random;
+import com.showcase.todoapp.utils.Utility;
 
 public class TodoListFragment extends Fragment implements QueryHandler.AsyncQueryListener,
         LoaderManager.LoaderCallbacks<Cursor>, TodoListAdapter.OnRowClickListener
 {
-    //    private RecyclerView mTodoList;
-    QueryHandler mQueryHandler;
-    TodoListAdapter adapter;
+    private QueryHandler mQueryHandler;
+    private TodoListAdapter adapter;
     private TodoListFragmentListener mFragmentListener;
+
+    public TodoListFragment()
+    {
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState)
@@ -38,11 +40,6 @@ public class TodoListFragment extends Fragment implements QueryHandler.AsyncQuer
         {
             mFragmentListener = (TodoListFragmentListener) getActivity();
         }
-    }
-
-    public TodoListFragment()
-    {
-
     }
 
     @Nullable
@@ -68,16 +65,16 @@ public class TodoListFragment extends Fragment implements QueryHandler.AsyncQuer
                 .fragment_todo_list_rv_list);
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(adapter);
+        recyclerView.addItemDecoration(new SpacesItemDecoration((int) Utility.dpToPx(10,
+                getContext())));
+//        recyclerView.s
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         getView().findViewById(R.id.fragment_button).setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View view)
             {
-                Random random = new Random();
-                ContentValues values = new ContentValues();
-                values.put(TodoContract.Todo.Columns.DATA, "test " + random.nextInt(100));
-                mQueryHandler.startInsert(1, null, TodoContract.Todo.CONTENT_URI, values);
+                displayDetailsFragment();
             }
         });
     }
@@ -94,7 +91,9 @@ public class TodoListFragment extends Fragment implements QueryHandler.AsyncQuer
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args)
     {
-        return new CursorLoader(getContext(), TodoContract.Todo.CONTENT_URI, null, null, null,
+        String[] projection = {TodoContract.Todo.Columns._ID, TodoContract.Todo.Columns.TITLE,
+                TodoContract.Todo.Columns.DATE, TodoContract.Todo.Columns.PRIORITY};
+        return new CursorLoader(getContext(), TodoContract.Todo.CONTENT_URI, projection, null, null,
                 null);
     }
 
@@ -112,6 +111,11 @@ public class TodoListFragment extends Fragment implements QueryHandler.AsyncQuer
 
     @Override
     public void onRowClick(int position)
+    {
+        displayDetailsFragment();
+    }
+
+    private void displayDetailsFragment()
     {
         if (mFragmentListener != null)
         {
@@ -155,5 +159,28 @@ public class TodoListFragment extends Fragment implements QueryHandler.AsyncQuer
     public interface TodoListFragmentListener
     {
         void displayTodoDetailsFragment();
+    }
+
+    public static class SpacesItemDecoration extends RecyclerView.ItemDecoration
+    {
+        private int space;
+
+        public SpacesItemDecoration(int space)
+        {
+            this.space = space;
+        }
+
+        @Override
+        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView
+                .State state)
+        {
+            outRect.left = space;
+            outRect.right = space;
+            outRect.bottom = space;
+
+            // Add top margin only for the first item to avoid double space between items
+            if (parent.getChildAdapterPosition(view) == 0)
+                outRect.top = space;
+        }
     }
 }

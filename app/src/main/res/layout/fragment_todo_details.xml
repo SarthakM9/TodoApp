@@ -83,14 +83,26 @@
             android:id="@+id/fragment_todo_details_tv_date"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginLeft="15dp"
+            android:layout_marginLeft="25dp"
             android:layout_weight="1"
             android:drawableRight="@android:drawable/ic_menu_my_calendar"
             android:drawableTint="@android:color/black"
             android:gravity="center_vertical"
             android:text="DDMMYY"
+            android:textColor="@android:color/black"
             android:textSize="18sp"
             android:textStyle="italic"
             />
     </LinearLayout>
+
+    <Button
+        android:id="@+id/fragment_todo_details_btn_save_todo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="25dp"
+        android:background="@drawable/drawable_button_bg"
+        android:padding="10dp"
+        android:text="SAVE TODO"
+        android:textColor="@android:color/white"/>
 </LinearLayout>

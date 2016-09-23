@@ -11,9 +11,13 @@ public class TodoDbHelper extends SQLiteOpenHelper
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "todoitems.db";
     private static final String COMMA_SEP = ",";
+    private static final String SPACE = " ";
 
     private static final String CREATE_TABLE_TODO = "CREATE TABLE " + TodoContract.Todo.TABLE_NAME +
-            "(" + Columns._ID + " INTEGER PRIMARY KEY" + COMMA_SEP + Columns.DATA + " TEXT NOT NULL"
+            "(" + Columns._ID + SPACE + "INTEGER PRIMARY KEY" + COMMA_SEP + Columns.TITLE + SPACE +
+            "TEXT NOT NULL" + COMMA_SEP + Columns.DESCRIPTION + SPACE + "TEXT NOT NULL" +
+            COMMA_SEP + Columns.DATE + SPACE + "TEXT NOT NULL" + COMMA_SEP + Columns.PRIORITY +
+            SPACE + "INTEGER"
             + ")";
     private static final String DROP_TABLE_TODO = "DROP TABLE IF EXISTS " + TodoContract.Todo
             .TABLE_NAME;

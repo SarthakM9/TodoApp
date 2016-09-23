@@ -32,7 +32,7 @@ public class TodoListAdapter extends CursorRecyclerAdapter<TodoListAdapter.ItemV
     public void onBindViewHolder(ItemViewHolder holder, Cursor cursor)
     {
         holder.textView.setText(cursor.getString(cursor.getColumnIndex(TodoContract.Todo.Columns
-                .DATA)));
+                .TITLE)));
     }
 
     @Override
@@ -121,7 +121,7 @@ public class TodoListAdapter extends CursorRecyclerAdapter<TodoListAdapter.ItemV
                 if (mCursor.moveToPosition(getAdapterPosition()))
                 {
                     int columnIdIndex = mCursor.getColumnIndex(TodoContract.Todo.Columns._ID);
-                    int columnDataIndex = mCursor.getColumnIndex(TodoContract.Todo.Columns.DATA);
+                    int columnDataIndex = mCursor.getColumnIndex(TodoContract.Todo.Columns.TITLE);
                     mClickListener.onRowLongClick(getAdapterPosition(), mCursor.getString
                             (columnDataIndex), mCursor.getInt(columnIdIndex));
                 }
