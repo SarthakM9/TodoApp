@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             android:background="@color/lightBackground"
-             android:clickable="true"
-             android:padding="10dp"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/lightBackground"
+            android:clickable="true"
+            android:fillViewport="true"
+            android:padding="10dp"
     >
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:background="@drawable/drawable_list_row_bg"
         android:orientation="vertical"
         android:padding="15dp"
@@ -25,10 +26,10 @@
                 android:id="@+id/fragment_todo_details_et_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Title"
+                android:hint="@string/title"
                 android:maxLength="25"
                 android:maxLines="1"
-                android:textSize="18sp"
+                android:textSize="@dimen/text_big"
                 />
 
         </android.support.design.widget.TextInputLayout>
@@ -43,10 +44,10 @@
                 android:id="@+id/fragment_todo_details_et_desc"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Description"
+                android:hint="@string/description"
                 android:maxLength="150"
                 android:maxLines="5"
-                android:textSize="18sp"
+                android:textSize="@dimen/text_big"
                 />
 
         </android.support.design.widget.TextInputLayout>
@@ -63,8 +64,8 @@
                 android:id="@+id/textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Select Priority"
-                android:textSize="18sp"
+                android:text="@string/select_priority"
+                android:textSize="@dimen/text_big"
                 />
 
             <Spinner
@@ -72,6 +73,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="15dp"
+                android:layout_marginStart="15dp"
                 android:layout_weight="1"
                 />
         </LinearLayout>
@@ -88,8 +90,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Due Date"
-                android:textSize="18sp"
+                android:text="@string/deadline"
+                android:textSize="@dimen/text_big"
                 />
 
             <TextView
@@ -97,13 +99,14 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="25dp"
+                android:layout_marginStart="25dp"
                 android:layout_weight="1"
+                android:drawableEnd="@android:drawable/ic_menu_my_calendar"
                 android:drawableRight="@android:drawable/ic_menu_my_calendar"
-                android:drawableTint="@android:color/black"
                 android:gravity="center_vertical"
-                android:text="DDMMYY"
+                android:text="@string/ddmmyy"
                 android:textColor="@android:color/black"
-                android:textSize="18sp"
+                android:textSize="@dimen/text_big"
                 android:textStyle="italic"
                 />
         </LinearLayout>
@@ -116,8 +119,8 @@
             android:layout_marginTop="25dp"
             android:background="@drawable/drawable_button_bg"
             android:padding="10dp"
-            android:text="SAVE TODO"
+            android:text="@string/save_todo"
             android:textColor="@android:color/white"
             />
     </LinearLayout>
-</FrameLayout>
+</ScrollView>

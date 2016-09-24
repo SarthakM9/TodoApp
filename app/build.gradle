@@ -14,6 +14,7 @@ android {
     buildTypes {
         release {
             minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -32,8 +33,5 @@ dependencies {
     releaseCompile "com.squareup.leakcanary:leakcanary-android-no-op:$leak_canary_version"
     testCompile "com.squareup.leakcanary:leakcanary-android-no-op:$leak_canary_version"
     compile "com.android.support:appcompat-v7:$android_support_library_version"
-//    compile "com.android.support:recyclerview-v7:$android_support_library_version"
     compile "com.android.support:design:$android_support_library_version"
-
-
 }

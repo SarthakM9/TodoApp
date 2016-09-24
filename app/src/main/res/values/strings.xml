@@ -1,5 +1,18 @@
 <resources>
     <string name="app_name">TodoApp</string>
+    <string name="todo_list">TODO List</string>
+    <string name="todo_details">TODO Details</string>
+    <string name="delete_dialog_message">Are you sure you want to delete your TODO:\n\n</string>
+    <string name="delete_dialog_title">Delete TODO</string>
+    <string name="invalid_state">Invalid state! Please try again.</string>
+    <string name="err_title_blank">Title cannot be blank</string>
+    <string name="your_todo_is_empty">Your TODO is empty.</string>
+    <string name="title">Title</string>
+    <string name="description">Description</string>
+    <string name="select_priority">Select Priority</string>
+    <string name="deadline">Deadline</string>
+    <string name="ddmmyy">DDMMYY</string>
+    <string name="save_todo">SAVE TODO</string>
     <string-array name="priority_array">
         <item>HIGH</item>
         <item>MEDIUM</item>

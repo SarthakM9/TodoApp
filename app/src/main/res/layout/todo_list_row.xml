@@ -13,13 +13,14 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
+        android:layout_marginEnd="40dp"
         android:layout_marginRight="40dp"
         android:layout_toLeftOf="@+id/todo_list_row_tv_priority"
         android:layout_toStartOf="@+id/todo_list_row_tv_priority"
         android:ellipsize="end"
         android:maxLines="1"
         android:textColor="@android:color/black"
-        android:textSize="18sp"
+        android:textSize="@dimen/text_big"
         />
 
     <TextView
@@ -29,7 +30,7 @@
         android:layout_alignBaseline="@+id/todo_list_row_tv_title"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:textSize="14sp"
+        android:textSize="@dimen/text_small"
         />
 
     <TextView
@@ -40,7 +41,7 @@
         android:layout_alignParentStart="true"
         android:layout_below="@+id/todo_list_row_tv_title"
         android:layout_marginTop="10dp"
-        android:textSize="14sp"
+        android:textSize="@dimen/text_small"
         android:textStyle="italic"
         />
 

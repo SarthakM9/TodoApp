@@ -65,7 +65,7 @@ public class TodoListAdapter extends CursorRecyclerAdapter<TodoListAdapter.ItemV
         private final TextView date;
         private final TextView priority;
 
-        public ItemViewHolder(View itemView)
+        ItemViewHolder(View itemView)
         {
             super(itemView);
             title = (TextView) itemView.findViewById(R.id.todo_list_row_tv_title);

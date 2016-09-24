@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.showcase.todoapp.R;
+import com.showcase.todoapp.TodoApplication;
 import com.showcase.todoapp.database.QueryHandler;
 import com.showcase.todoapp.database.TodoContract;
 import com.showcase.todoapp.ui.todolist.TodoListFragment;
@@ -30,11 +31,14 @@ public class TodoDetailsFragment extends Fragment implements View.OnClickListene
 {
     private TextView mDate;
     private TodoDetailsFragmentListener mFragmentListener;
-    //    private boolean mIsUpdating = false;
     private EditText mTitle;
     private EditText mDescription;
     private Spinner mSpinner;
     private Uri mUri;
+
+    public TodoDetailsFragment()
+    {
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState)
@@ -48,7 +52,7 @@ public class TodoDetailsFragment extends Fragment implements View.OnClickListene
         Bundle bundle = getArguments();
         if (bundle != null && !bundle.isEmpty())
         {
-            mUri = bundle.getParcelable("uri");
+            mUri = bundle.getParcelable(TodoListFragment.URI_KEY);
         }
     }
 
@@ -67,7 +71,8 @@ public class TodoDetailsFragment extends Fragment implements View.OnClickListene
         if (mUri != null)
         {
             QueryHandler handler = new QueryHandler(getContext(), this);
-            handler.startQuery(1, null, mUri, null, null, null, null);
+            handler.startQuery(QueryHandler.OperationToken.TOKEN_QUERY, null, mUri, null, null,
+                    null, null);
         }
     }
 
@@ -110,7 +115,7 @@ public class TodoDetailsFragment extends Fragment implements View.OnClickListene
                 }
                 else
                 {
-                    Toast.makeText(getContext(), "Title cannot be blank", Toast.LENGTH_SHORT)
+                    Toast.makeText(getContext(), R.string.err_title_blank, Toast.LENGTH_SHORT)
                             .show();
                 }
                 break;
@@ -141,16 +146,22 @@ public class TodoDetailsFragment extends Fragment implements View.OnClickListene
             long _id = ContentUris.parseId(mUri);
             String selection = TodoContract.Todo.Columns._ID + " = ?";
             String[] selectionArg = {String.valueOf(_id)};
-            queryHandler.startUpdate(1, null, TodoContract.Todo.CONTENT_URI, values, selection,
-                    selectionArg);
-//            queryHandl
+            queryHandler.startUpdate(QueryHandler.OperationToken.TOKEN_UPDATE, null, TodoContract
+                    .Todo.CONTENT_URI, values, selection, selectionArg);
         }
         else
         {
-
-            queryHandler.startInsert(1, null, TodoContract.Todo.CONTENT_URI, values);
+            queryHandler.startInsert(QueryHandler.OperationToken.TOKEN_INSERT, null, TodoContract
+                    .Todo.CONTENT_URI, values);
         }
         getActivity().getSupportFragmentManager().popBackStack();
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        TodoApplication.getRefWatcher(getContext()).watch(this);
+        super.onDestroy();
     }
 
     public void setDate(String date)
@@ -163,7 +174,6 @@ public class TodoDetailsFragment extends Fragment implements View.OnClickListene
     {
         if (cursor != null && cursor.getCount() == 1 && cursor.moveToFirst())
         {
-//            cursor.moveToFirst();
             mTitle.setText(cursor.getString(cursor.getColumnIndex(TodoContract.Todo.Columns
                     .TITLE)));
 
@@ -176,28 +186,10 @@ public class TodoDetailsFragment extends Fragment implements View.OnClickListene
         }
         else
         {
-            Toast.makeText(getContext(), "Invalid state! Please try again.", Toast.LENGTH_SHORT)
+            Toast.makeText(getContext(), R.string.invalid_state, Toast.LENGTH_SHORT)
                     .show();
             getActivity().getSupportFragmentManager().popBackStack();
         }
-    }
-
-    @Override
-    public void onDeleteComplete(int token, Object cookie, int result)
-    {
-
-    }
-
-    @Override
-    public void onInsertComplete(int token, Object cookie, Uri uri)
-    {
-
-    }
-
-    @Override
-    public void onUpdateComplete(int token, Object cookie, int result)
-    {
-
     }
 
     public interface TodoDetailsFragmentListener

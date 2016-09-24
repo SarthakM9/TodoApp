@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.ViewSwitcher;
 
 import com.showcase.todoapp.R;
+import com.showcase.todoapp.TodoApplication;
 import com.showcase.todoapp.database.QueryHandler;
 import com.showcase.todoapp.database.TodoContract;
 import com.showcase.todoapp.utils.SpacesItemDecoration;
@@ -26,10 +27,11 @@ import com.showcase.todoapp.utils.Utility;
 public class TodoListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,
         TodoListAdapter.OnRowClickListener
 {
-    private QueryHandler mQueryHandler;
     private TodoListAdapter mAdapter;
     private TodoListFragmentListener mFragmentListener;
     private ViewSwitcher mSwitcher;
+    public static final String URI_KEY = "uri";
+    private static final int LOADER_ID = 1;
 
     public TodoListFragment()
     {
@@ -58,14 +60,13 @@ public class TodoListFragment extends Fragment implements LoaderManager.LoaderCa
     {
         super.onActivityCreated(savedInstanceState);
 
-        mSwitcher = (ViewSwitcher) getView().findViewById(R.id.fragment_todo_list_switcher);
+        View view = getView();
+        mSwitcher = (ViewSwitcher) view.findViewById(R.id.fragment_todo_list_switcher);
 
-        mQueryHandler = new QueryHandler(getContext(), null);
-
-        getLoaderManager().initLoader(1, null, this);
+        getLoaderManager().initLoader(LOADER_ID, null, this);
 
         mAdapter = new TodoListAdapter(getContext(), null, this);
-        RecyclerView recyclerView = (RecyclerView) getView().findViewById(R.id
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id
                 .fragment_todo_list_rv_list);
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(mAdapter);
@@ -73,7 +74,7 @@ public class TodoListFragment extends Fragment implements LoaderManager.LoaderCa
         recyclerView.addItemDecoration(new SpacesItemDecoration((int) Utility.dpToPx(5,
                 getContext())));
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        getView().findViewById(R.id.fragment_button).setOnClickListener(new View.OnClickListener()
+        view.findViewById(R.id.fragment_button).setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View view)
@@ -96,7 +97,6 @@ public class TodoListFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data)
     {
-//        mAdapter.swapCursor(data);
         if (data.getCount() > 0)
         {
             mAdapter.swapCursor(data);
@@ -122,7 +122,7 @@ public class TodoListFragment extends Fragment implements LoaderManager.LoaderCa
     public void onRowClick(Uri uri)
     {
         Bundle bundle = new Bundle();
-        bundle.putParcelable("uri", uri);
+        bundle.putParcelable(URI_KEY, uri);
         displayDetailsFragment(bundle);
     }
 
@@ -143,21 +143,30 @@ public class TodoListFragment extends Fragment implements LoaderManager.LoaderCa
     private void showDialog(String message, final int rowId)
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener()
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener()
         {
             public void onClick(DialogInterface dialog, int id)
             {
                 String selection = TodoContract.Todo.Columns._ID + " = ?";
-                mQueryHandler.startDelete(4, 0, TodoContract.Todo.CONTENT_URI, selection, new
-                        String[]{String.valueOf(rowId)});
+                QueryHandler queryHandler = new QueryHandler(getContext(), null);
+                queryHandler.startDelete(QueryHandler.OperationToken.TOKEN_DELETE, null,
+                        TodoContract.Todo.CONTENT_URI, selection, new
+                                String[]{String.valueOf(rowId)});
             }
         });
-        builder.setNegativeButton("CANCEL", null);
+        builder.setNegativeButton(android.R.string.cancel, null);
         AlertDialog dialog = builder.create();
         dialog.setCancelable(false);
-        dialog.setTitle("Delete TODO");
-        dialog.setMessage("Are you sure you want to delete your TODO:\n\n" + message);
+        dialog.setTitle(getString(R.string.delete_dialog_title));
+        dialog.setMessage(getString(R.string.delete_dialog_message) + message);
         dialog.show();
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        TodoApplication.getRefWatcher(getContext()).watch(this);
+        super.onDestroy();
     }
 
     public interface TodoListFragmentListener

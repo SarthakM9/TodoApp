@@ -2,6 +2,7 @@ package com.showcase.todoapp.ui;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.support.annotation.StringRes;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -18,27 +19,15 @@ import java.util.Calendar;
 
 public class TodoItemsActivity extends AppCompatActivity implements TodoListFragment
         .TodoListFragmentListener, TodoDetailsFragment.TodoDetailsFragmentListener,
-        DatePickerDialog.OnDateSetListener/* implements
-        View.OnClickListener,
-        TodoItemsContract.ViewReaction, QueryHandler.AsyncQueryListener*/
+        DatePickerDialog.OnDateSetListener
 {
     private static final String TAG_FRAGMENT_DETAILS = "detailsfragment";
-//    private QueryHandler mQueryHandler;
-
-
-//    @Override
-//    protected void onResume()
-//    {
-//        super.onResume();
-//    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_todo_items);
-//        mQueryHandler = new QueryHandler(this, this);
-//        initViews();
         showTodoListFragment();
     }
 
@@ -47,44 +36,33 @@ public class TodoItemsActivity extends AppCompatActivity implements TodoListFrag
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         transaction.add(R.id.activity_todo_items_fl_fragment_container, new TodoListFragment());
-//        transaction.addToBackStack(null);
         transaction.commit();
+        setActionBarTitle(R.string.todo_list);
     }
-
-
-//
-//    @Override
-//    public void onQueryComplete(int token, Object cookie, Uri uri)
-//    {
-//        if (token == 1)
-//        {
-//            if (uri != null)
-//            {
-//                Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-//                if (cursor != null)
-//                {
-//                    while (cursor.moveToNext())
-//                    {
-//                        Log.i("cursor-value", cursor.getString(cursor.getColumnIndex(TodoContract
-//                                .Todo.Columns.DATA)) + "  ID:" + cursor.getString(cursor
-//                                .getColumnIndex(TodoContract
-//                                        .Todo.Columns._ID)));
-//                    }
-//                    cursor.close();
-//                }
-//                else
-//                {
-//                    Log.i("cursor-value", "null");
-//                }
-//            }
-//
-//        }
-//    }
 
     @Override
     public void onBackPressed()
     {
-        getSupportFragmentManager().popBackStack();
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0)
+        {
+            getSupportFragmentManager().popBackStack();
+            setActionBarTitle(R.string.todo_list);
+        }
+        else
+        {
+            super.onBackPressed();
+        }
+    }
+
+    private void setActionBarTitle(@StringRes int stringRes)
+    {
+        try
+        {
+            getSupportActionBar().setTitle(stringRes);
+        }
+        catch (NullPointerException ex)
+        {
+        }
     }
 
     @Override
@@ -95,13 +73,14 @@ public class TodoItemsActivity extends AppCompatActivity implements TodoListFrag
         getSupportFragmentManager().beginTransaction().add(R.id
                 .activity_todo_items_fl_fragment_container, fragment, TAG_FRAGMENT_DETAILS)
                 .addToBackStack(null).commit();
+        setActionBarTitle(R.string.todo_details);
     }
 
     @Override
     public void displayDatePickerDialog()
     {
         DialogFragment newFragment = new DatePickerFragment();
-        newFragment.show(getSupportFragmentManager(), "datePicker");
+        newFragment.show(getSupportFragmentManager(), null);
     }
 
     @Override
