@@ -14,7 +14,7 @@ The following functionality is completed:
 * [x] User can tap a todo item in the list and bring up an edit screen for the todo item and then have any changes to the text reflected in the todo list.
 * [x] User can persist todo items and retrieve them properly on app restart
 
-The following features are implemented:
+The following optional features are implemented:
 
 * [x] Persist the todo items into SQLite instead of a text file (content provider used along with AsyncQueryHandler).
 * [x] Improve style of the todo items in the list (custom recycylerview adapter implemented with cursor support).
@@ -31,7 +31,7 @@ Spent some time on implementing a content provider to access SQLite database.
 
 Here's a walkthrough of implemented user stories:
 
-<img src='TodoApp/todoappvid.gif ' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+<img src='https://github.com/mrdevilbynature/TodoApp/blob/master/todoappvid.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
 
 GIF created with LiceCap(http://www.cockos.com/licecap/).
 
