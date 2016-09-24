@@ -154,7 +154,15 @@ public class TodoDetailsFragment extends Fragment implements View.OnClickListene
             queryHandler.startInsert(QueryHandler.OperationToken.TOKEN_INSERT, null, TodoContract
                     .Todo.CONTENT_URI, values);
         }
-        getActivity().getSupportFragmentManager().popBackStack();
+        finishFragment();
+    }
+
+    private void finishFragment()
+    {
+        if (mFragmentListener != null)
+        {
+            mFragmentListener.finishDetailsFragment();
+        }
     }
 
     @Override
@@ -188,12 +196,14 @@ public class TodoDetailsFragment extends Fragment implements View.OnClickListene
         {
             Toast.makeText(getContext(), R.string.invalid_state, Toast.LENGTH_SHORT)
                     .show();
-            getActivity().getSupportFragmentManager().popBackStack();
+            finishFragment();
         }
     }
 
     public interface TodoDetailsFragmentListener
     {
         void displayDatePickerDialog();
+
+        void finishDetailsFragment();
     }
 }
