@@ -1,31 +1,25 @@
-# Pre-work - TodoApp
+# TodoApp
 
 TodoApp is an android app that allows building a todo list and basic todo items management functionality including adding new items, editing and deleting an existing item.
 
-Submitted by: Sarthak Mittal
+This app was submitted for **CodePath** prework.
 
-Time spent: 16 hours spent in total
+I won't be adding any new features but I would be more than happy to fix any issues and accept pull requests.
 
 ## User Stories
 
-The following functionality is completed:
-
 * [x] User can successfully add and remove items from the todo list
 * [x] User can tap a todo item in the list and bring up an edit screen for the todo item and then have any changes to the text reflected in the todo list.
-* [x] User can persist todo items and retrieve them properly on app restart
+* [x] User can persist todo items and retrieve them properly on app restart.
+* [x] Support for completion due dates for todo items.
+* [x] Support for selecting the priority of each todo item.
 
-The following optional features are implemented:
+## Android specifics (Things his app can help you learn)
 
-* [x] Persist the todo items into SQLite instead of a text file (content provider used along with AsyncQueryHandler).
-* [x] Improve style of the todo items in the list (custom recycylerview adapter implemented with cursor support).
-* [x] Add support for completion due dates for todo items and display within list item.
-* [x] Use a Fragment instead of new Activity for editing items.
-* [x] Add support for selecting the priority of each todo item and display in list item.
-* [x] Tweak the style improving the UI / UX, play with colors, images or backgrounds
-
-## Notes:
-
-Spent some time on implementing a content provider to access SQLite database.
+* [x] Compiling and loading libraries only for specific build variants.
+* [x] Use of SQLite database using ContentProvider and AsyncQueryHandler
+ (although, It can serve as a good example to develop your database layer. But I would now suggest to use **Room** library instead).
+* [x] Custom RecycylerView Adapter with Cursor support. 
 
 ## Video Walkthrough 
 
