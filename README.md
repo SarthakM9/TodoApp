@@ -14,12 +14,12 @@ I won't be adding any new features but I would be more than happy to fix any iss
 * [x] Support for completion due dates for todo items.
 * [x] Support for selecting the priority of each todo item.
 
-## Android specifics (Things his app can help you learn)
+## Not so common things this app can help you learn
 
 * [x] Compiling and loading libraries only for specific build variants.
 * [x] Use of SQLite database using ContentProvider and AsyncQueryHandler
  (although, It can serve as a good example to develop your database layer. But I would now suggest to use **Room** library instead).
-* [x] Custom RecycylerView Adapter with Cursor support. 
+* [x] Custom RecyclerView Adapter with Cursor support. 
 
 ## Video Walkthrough 
 
